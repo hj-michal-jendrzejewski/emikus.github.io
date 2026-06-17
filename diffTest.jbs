@@ -1,6 +1,9 @@
 <trans>
-$mb.queue.name = "q_in_shopify_sap";
-$mb.queue.name.alias = "diffTest";
+//error notification data:
+$failedOperationNameDiffTest = $jitterbit.operation.name;
+//error notification data END
+
+$mb.queue.name = "q_in_shopify_sap_orders_diff_testing";
 
 // All the messages from processed queue are saved to $payload variable during "JBMQ - GET Messages" operation run
 $payloadJSON = JSONParser($payload);
@@ -9,4 +12,29 @@ queueMessagesAll = $payloadJSON["messages"];
 queueMessagesAllNumber = $payloadJSON["messageCount"];
 WriteToOperationLog("Messages number: " + queueMessagesAllNumber);
 i = 0;
+
+//
+While(i < queueMessagesAllNumber,
+  message = queueMessagesAll[i];
+  WriteToOperationLog("message:::::");
+  WriteToOperationLog(message);
+  WriteToOperationLog("message::::: END");
+  
+  // Acknowledging or NACKing a message needs only one parameter - ackId
+  $mb.message.ackId.forMainQueue = message["ackId"];
+  $mb.message.ackId = message["ackId"];
+  
+  // message's retries number is stored in native x-delivery-count header
+  messageHeaders = message["properties"]["headers"];
+  RunScript("<TAG>script:get value by name</TAG>", messageHeaders, "x-delivery-count");
+  $mb.message.retriesNumber = IfEmpty(Int($value_of_the_name), 0);
+  
+  
+  //the content of the below variable is passed further with the request to relevant api endpoint in 'body' field 
+  $shopify.request.order.id = HexToString(BinaryToHex(Base64Decode(message["messageBody"])));
+  
+	RunOperation("<TAG>operation:Sync_Order</TAG>");
+      
+	i++;
+  );
 </trans>
