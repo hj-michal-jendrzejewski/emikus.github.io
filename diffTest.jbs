@@ -4,4 +4,9 @@ $failedOperationName = $jitterbit.operation.name;
 //error notification data END
 
 $mb.queue.name = "q_in_shopify_sap_orders_diff_test";
+$mb.queue.name.alias = "diffTest";
+
+messageHeaders = message["properties"]["headers"];
+RunScript("<TAG>script:get value by name</TAG>", messageHeaders, "x-delivery-count");
+$mb.message.retriesNumber = IfEmpty(Int($value_of_the_name), 0);
 </trans>
