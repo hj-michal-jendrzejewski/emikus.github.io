@@ -3,5 +3,5 @@
 $failedOperationName = $jitterbit.operation.name;
 //error notification data END
 
-$mb.queue.name = "q_in_shopify_sap_orders";
+$mb.queue.name = "q_in_shopify_sap_orders_diff_test";
 </trans>
